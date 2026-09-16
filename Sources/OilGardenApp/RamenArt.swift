@@ -3,18 +3,24 @@ import SwiftUI
 /// Resolution-independent artwork. Static ingredients are rendered separately from the simulation.
 struct RamenArt: View, Equatable {
     let broth: Broth
+    var layer: ArtLayer = .complete
+    enum ArtLayer { case complete, soup, toppings }
     var body: some View {
         Canvas { context, size in
             let scale = min(size.width, size.height) / 1000
             context.scaleBy(x: scale, y: scale)
-            drawBowl(&context)
-            drawSoup(&context)
-            drawNoodles(&context)
+            if layer != .toppings {
+                drawBowl(&context)
+                drawSoup(&context)
+                drawNoodles(&context)
+            }
+            if layer != .soup {
             drawNori(&context, at: CGPoint(x: 722, y: 259), angle: 0.42)
             drawPork(&context, at: CGPoint(x: 281, y: 294), angle: -0.45)
             drawPork(&context, at: CGPoint(x: 239, y: 370), angle: -0.7)
             drawEgg(&context, at: CGPoint(x: 748, y: 675), angle: -0.6)
             drawScallions(&context)
+            }
         }
         .accessibilityHidden(true)
     }
@@ -70,18 +76,23 @@ struct RamenArt: View, Equatable {
     private func drawNoodles(_ c: inout GraphicsContext) {
         var layer = c
         layer.clip(to: ellipse(122, 122, 756, 756))
-        for i in 0..<25 {
-            let offset = Double(i) * 9
+        for i in 0..<18 {
+            let offset = Double(i) * 7.5
             var noodle = Path()
-            noodle.move(to: .init(x: 135 + offset * 0.3, y: 530 + offset * 0.55))
-            noodle.addCurve(to: .init(x: 630 + offset * 0.6, y: 804 - offset * 0.13),
-                            control1: .init(x: 150 + offset * 0.45, y: 910 - offset * 0.35),
-                            control2: .init(x: 510 + offset * 0.3, y: 650 + offset * 0.65))
-            layer.stroke(noodle, with: .color(Color(hex: 0x69431F).opacity(0.5)), style: StrokeStyle(lineWidth: 11, lineCap: .round))
-            layer.stroke(noodle, with: .color(Color(hex: 0xE5BB68).opacity(0.72)), style: StrokeStyle(lineWidth: 7, lineCap: .round))
-            layer.stroke(noodle, with: .color(Color(hex: 0xFFE2A0).opacity(0.43)), lineWidth: 2)
+            noodle.move(to: .init(x: 174 + offset * 0.25, y: 526 + offset * 0.48))
+            // Loose individual curls beneath the broth, rather than parallel straight strands.
+            noodle.addCurve(to: .init(x: 316 + offset * 0.65, y: 776 - offset * 0.10),
+                            control1: .init(x: 91 + offset * 0.6, y: 703 + sin(Double(i)) * 32),
+                            control2: .init(x: 316 + offset * 0.55, y: 640 + offset * 0.48))
+            noodle.addCurve(to: .init(x: 645 + offset * 0.52, y: 811 - offset * 0.24),
+                            control1: .init(x: 265 + offset * 0.5, y: 888 - offset * 0.34),
+                            control2: .init(x: 597 + offset * 0.4, y: 681 + offset * 0.40))
+            layer.stroke(noodle, with: .color(Color(hex: 0x69431F).opacity(0.30)), style: StrokeStyle(lineWidth: 10, lineCap: .round))
+            layer.stroke(noodle, with: .color(Color(hex: 0xE5BB68).opacity(0.56)), style: StrokeStyle(lineWidth: 6, lineCap: .round))
+            layer.stroke(noodle, with: .color(Color(hex: 0xFFE2A0).opacity(0.32)), lineWidth: 1.6)
         }
     }
+
     private func drawNori(_ c: inout GraphicsContext, at center: CGPoint, angle: Double) {
         var l = c
         l.translateBy(x: center.x, y: center.y); l.rotate(by: .radians(angle))

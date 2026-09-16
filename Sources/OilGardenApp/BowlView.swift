@@ -11,7 +11,7 @@ struct BowlView: View {
         GeometryReader { geometry in
             let side = min(geometry.size.width, geometry.size.height)
             ZStack {
-                RamenArt(broth: session.broth).equatable()
+                RamenArt(broth: session.broth, layer: .soup).equatable()
                 Canvas { context, size in
                     let scale = min(size.width, size.height)
                     let radius = scale * 0.39
@@ -57,6 +57,8 @@ struct BowlView: View {
                                        with: .color(Color.paper.opacity((1 - progress) * 0.42)), lineWidth: 1)
                     }
                 }
+                RamenArt(broth: session.broth, layer: .toppings).equatable()
+                    .allowsHitTesting(false)
                 chopsticks(side: side)
             }
             .frame(width: side, height: side)
